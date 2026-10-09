@@ -15,3 +15,12 @@ export const PortfolioType = {
 } as const
 
 export type PortfolioType = (typeof PortfolioType)[keyof typeof PortfolioType]
+
+
+export const PortfolioStatus = {
+  draft: 'draft',
+  active: 'active',
+  closed: 'closed'
+} as const
+
+export type PortfolioStatus = (typeof PortfolioStatus)[keyof typeof PortfolioStatus]

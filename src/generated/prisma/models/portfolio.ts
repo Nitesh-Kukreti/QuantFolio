@@ -42,6 +42,7 @@ export type PortfolioMinAggregateOutputType = {
   totalCapital: runtime.Decimal | null
   createdAt: Date | null
   updatedAt: Date | null
+  status: $Enums.PortfolioStatus | null
 }
 
 export type PortfolioMaxAggregateOutputType = {
@@ -52,6 +53,7 @@ export type PortfolioMaxAggregateOutputType = {
   totalCapital: runtime.Decimal | null
   createdAt: Date | null
   updatedAt: Date | null
+  status: $Enums.PortfolioStatus | null
 }
 
 export type PortfolioCountAggregateOutputType = {
@@ -62,6 +64,7 @@ export type PortfolioCountAggregateOutputType = {
   totalCapital: number
   createdAt: number
   updatedAt: number
+  status: number
   _all: number
 }
 
@@ -82,6 +85,7 @@ export type PortfolioMinAggregateInputType = {
   totalCapital?: true
   createdAt?: true
   updatedAt?: true
+  status?: true
 }
 
 export type PortfolioMaxAggregateInputType = {
@@ -92,6 +96,7 @@ export type PortfolioMaxAggregateInputType = {
   totalCapital?: true
   createdAt?: true
   updatedAt?: true
+  status?: true
 }
 
 export type PortfolioCountAggregateInputType = {
@@ -102,6 +107,7 @@ export type PortfolioCountAggregateInputType = {
   totalCapital?: true
   createdAt?: true
   updatedAt?: true
+  status?: true
   _all?: true
 }
 
@@ -199,6 +205,7 @@ export type PortfolioGroupByOutputType = {
   totalCapital: runtime.Decimal
   createdAt: Date
   updatedAt: Date
+  status: $Enums.PortfolioStatus
   _count: PortfolioCountAggregateOutputType | null
   _avg: PortfolioAvgAggregateOutputType | null
   _sum: PortfolioSumAggregateOutputType | null
@@ -206,7 +213,7 @@ export type PortfolioGroupByOutputType = {
   _max: PortfolioMaxAggregateOutputType | null
 }
 
-type GetPortfolioGroupByPayload<T extends portfolioGroupByArgs> = Prisma.PrismaPromise<
+export type GetPortfolioGroupByPayload<T extends portfolioGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<PortfolioGroupByOutputType, T['by']> &
       {
@@ -232,6 +239,7 @@ export type portfolioWhereInput = {
   totalCapital?: Prisma.DecimalFilter<"portfolio"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFilter<"portfolio"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"portfolio"> | Date | string
+  status?: Prisma.EnumPortfolioStatusFilter<"portfolio"> | $Enums.PortfolioStatus
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.userWhereInput>
   holdings?: Prisma.PortfolioHoldingListRelationFilter
 }
@@ -244,6 +252,7 @@ export type portfolioOrderByWithRelationInput = {
   totalCapital?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   user?: Prisma.userOrderByWithRelationInput
   holdings?: Prisma.portfolioHoldingOrderByRelationAggregateInput
 }
@@ -259,6 +268,7 @@ export type portfolioWhereUniqueInput = Prisma.AtLeast<{
   totalCapital?: Prisma.DecimalFilter<"portfolio"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFilter<"portfolio"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"portfolio"> | Date | string
+  status?: Prisma.EnumPortfolioStatusFilter<"portfolio"> | $Enums.PortfolioStatus
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.userWhereInput>
   holdings?: Prisma.PortfolioHoldingListRelationFilter
 }, "id">
@@ -271,6 +281,7 @@ export type portfolioOrderByWithAggregationInput = {
   totalCapital?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   _count?: Prisma.portfolioCountOrderByAggregateInput
   _avg?: Prisma.portfolioAvgOrderByAggregateInput
   _max?: Prisma.portfolioMaxOrderByAggregateInput
@@ -289,6 +300,7 @@ export type portfolioScalarWhereWithAggregatesInput = {
   totalCapital?: Prisma.DecimalWithAggregatesFilter<"portfolio"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"portfolio"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"portfolio"> | Date | string
+  status?: Prisma.EnumPortfolioStatusWithAggregatesFilter<"portfolio"> | $Enums.PortfolioStatus
 }
 
 export type portfolioCreateInput = {
@@ -298,6 +310,7 @@ export type portfolioCreateInput = {
   totalCapital: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  status?: $Enums.PortfolioStatus
   user: Prisma.userCreateNestedOneWithoutPortfolioInput
   holdings?: Prisma.portfolioHoldingCreateNestedManyWithoutPortfolioInput
 }
@@ -310,6 +323,7 @@ export type portfolioUncheckedCreateInput = {
   totalCapital: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  status?: $Enums.PortfolioStatus
   holdings?: Prisma.portfolioHoldingUncheckedCreateNestedManyWithoutPortfolioInput
 }
 
@@ -320,6 +334,7 @@ export type portfolioUpdateInput = {
   totalCapital?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumPortfolioStatusFieldUpdateOperationsInput | $Enums.PortfolioStatus
   user?: Prisma.userUpdateOneRequiredWithoutPortfolioNestedInput
   holdings?: Prisma.portfolioHoldingUpdateManyWithoutPortfolioNestedInput
 }
@@ -332,6 +347,7 @@ export type portfolioUncheckedUpdateInput = {
   totalCapital?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumPortfolioStatusFieldUpdateOperationsInput | $Enums.PortfolioStatus
   holdings?: Prisma.portfolioHoldingUncheckedUpdateManyWithoutPortfolioNestedInput
 }
 
@@ -343,6 +359,7 @@ export type portfolioCreateManyInput = {
   totalCapital: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  status?: $Enums.PortfolioStatus
 }
 
 export type portfolioUpdateManyMutationInput = {
@@ -352,6 +369,7 @@ export type portfolioUpdateManyMutationInput = {
   totalCapital?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumPortfolioStatusFieldUpdateOperationsInput | $Enums.PortfolioStatus
 }
 
 export type portfolioUncheckedUpdateManyInput = {
@@ -362,6 +380,7 @@ export type portfolioUncheckedUpdateManyInput = {
   totalCapital?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumPortfolioStatusFieldUpdateOperationsInput | $Enums.PortfolioStatus
 }
 
 export type PortfolioListRelationFilter = {
@@ -382,6 +401,7 @@ export type portfolioCountOrderByAggregateInput = {
   totalCapital?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  status?: Prisma.SortOrder
 }
 
 export type portfolioAvgOrderByAggregateInput = {
@@ -396,6 +416,7 @@ export type portfolioMaxOrderByAggregateInput = {
   totalCapital?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  status?: Prisma.SortOrder
 }
 
 export type portfolioMinOrderByAggregateInput = {
@@ -406,6 +427,7 @@ export type portfolioMinOrderByAggregateInput = {
   totalCapital?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  status?: Prisma.SortOrder
 }
 
 export type portfolioSumOrderByAggregateInput = {
@@ -471,6 +493,10 @@ export type DecimalFieldUpdateOperationsInput = {
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
+export type EnumPortfolioStatusFieldUpdateOperationsInput = {
+  set?: $Enums.PortfolioStatus
+}
+
 export type portfolioCreateNestedOneWithoutHoldingsInput = {
   create?: Prisma.XOR<Prisma.portfolioCreateWithoutHoldingsInput, Prisma.portfolioUncheckedCreateWithoutHoldingsInput>
   connectOrCreate?: Prisma.portfolioCreateOrConnectWithoutHoldingsInput
@@ -492,6 +518,7 @@ export type portfolioCreateWithoutUserInput = {
   totalCapital: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  status?: $Enums.PortfolioStatus
   holdings?: Prisma.portfolioHoldingCreateNestedManyWithoutPortfolioInput
 }
 
@@ -502,6 +529,7 @@ export type portfolioUncheckedCreateWithoutUserInput = {
   totalCapital: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  status?: $Enums.PortfolioStatus
   holdings?: Prisma.portfolioHoldingUncheckedCreateNestedManyWithoutPortfolioInput
 }
 
@@ -542,6 +570,7 @@ export type portfolioScalarWhereInput = {
   totalCapital?: Prisma.DecimalFilter<"portfolio"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFilter<"portfolio"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"portfolio"> | Date | string
+  status?: Prisma.EnumPortfolioStatusFilter<"portfolio"> | $Enums.PortfolioStatus
 }
 
 export type portfolioCreateWithoutHoldingsInput = {
@@ -551,6 +580,7 @@ export type portfolioCreateWithoutHoldingsInput = {
   totalCapital: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  status?: $Enums.PortfolioStatus
   user: Prisma.userCreateNestedOneWithoutPortfolioInput
 }
 
@@ -562,6 +592,7 @@ export type portfolioUncheckedCreateWithoutHoldingsInput = {
   totalCapital: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  status?: $Enums.PortfolioStatus
 }
 
 export type portfolioCreateOrConnectWithoutHoldingsInput = {
@@ -587,6 +618,7 @@ export type portfolioUpdateWithoutHoldingsInput = {
   totalCapital?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumPortfolioStatusFieldUpdateOperationsInput | $Enums.PortfolioStatus
   user?: Prisma.userUpdateOneRequiredWithoutPortfolioNestedInput
 }
 
@@ -598,6 +630,7 @@ export type portfolioUncheckedUpdateWithoutHoldingsInput = {
   totalCapital?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumPortfolioStatusFieldUpdateOperationsInput | $Enums.PortfolioStatus
 }
 
 export type portfolioCreateManyUserInput = {
@@ -607,6 +640,7 @@ export type portfolioCreateManyUserInput = {
   totalCapital: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  status?: $Enums.PortfolioStatus
 }
 
 export type portfolioUpdateWithoutUserInput = {
@@ -616,6 +650,7 @@ export type portfolioUpdateWithoutUserInput = {
   totalCapital?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumPortfolioStatusFieldUpdateOperationsInput | $Enums.PortfolioStatus
   holdings?: Prisma.portfolioHoldingUpdateManyWithoutPortfolioNestedInput
 }
 
@@ -626,6 +661,7 @@ export type portfolioUncheckedUpdateWithoutUserInput = {
   totalCapital?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumPortfolioStatusFieldUpdateOperationsInput | $Enums.PortfolioStatus
   holdings?: Prisma.portfolioHoldingUncheckedUpdateManyWithoutPortfolioNestedInput
 }
 
@@ -636,6 +672,7 @@ export type portfolioUncheckedUpdateManyWithoutUserInput = {
   totalCapital?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumPortfolioStatusFieldUpdateOperationsInput | $Enums.PortfolioStatus
 }
 
 
@@ -677,6 +714,7 @@ export type portfolioSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   totalCapital?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  status?: boolean
   user?: boolean | Prisma.userDefaultArgs<ExtArgs>
   holdings?: boolean | Prisma.portfolio$holdingsArgs<ExtArgs>
   _count?: boolean | Prisma.PortfolioCountOutputTypeDefaultArgs<ExtArgs>
@@ -690,6 +728,7 @@ export type portfolioSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   totalCapital?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  status?: boolean
   user?: boolean | Prisma.userDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["portfolio"]>
 
@@ -701,6 +740,7 @@ export type portfolioSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   totalCapital?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  status?: boolean
   user?: boolean | Prisma.userDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["portfolio"]>
 
@@ -712,9 +752,10 @@ export type portfolioSelectScalar = {
   totalCapital?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  status?: boolean
 }
 
-export type portfolioOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "name" | "type" | "totalCapital" | "createdAt" | "updatedAt", ExtArgs["result"]["portfolio"]>
+export type portfolioOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "name" | "type" | "totalCapital" | "createdAt" | "updatedAt" | "status", ExtArgs["result"]["portfolio"]>
 export type portfolioInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.userDefaultArgs<ExtArgs>
   holdings?: boolean | Prisma.portfolio$holdingsArgs<ExtArgs>
@@ -741,6 +782,7 @@ export type $portfolioPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     totalCapital: runtime.Decimal
     createdAt: Date
     updatedAt: Date
+    status: $Enums.PortfolioStatus
   }, ExtArgs["result"]["portfolio"]>
   composites: {}
 }
@@ -1173,6 +1215,7 @@ export interface portfolioFieldRefs {
   readonly totalCapital: Prisma.FieldRef<"portfolio", 'Decimal'>
   readonly createdAt: Prisma.FieldRef<"portfolio", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"portfolio", 'DateTime'>
+  readonly status: Prisma.FieldRef<"portfolio", 'PortfolioStatus'>
 }
     
 
@@ -1369,6 +1412,11 @@ export type portfolioFindManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Skip the first `n` portfolios.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of portfolios.
+   */
   distinct?: Prisma.PortfolioScalarFieldEnum | Prisma.PortfolioScalarFieldEnum[]
 }
 

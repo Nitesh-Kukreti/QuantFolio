@@ -210,7 +210,7 @@ export type PortfolioHoldingGroupByOutputType = {
   _max: PortfolioHoldingMaxAggregateOutputType | null
 }
 
-type GetPortfolioHoldingGroupByPayload<T extends portfolioHoldingGroupByArgs> = Prisma.PrismaPromise<
+export type GetPortfolioHoldingGroupByPayload<T extends portfolioHoldingGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<PortfolioHoldingGroupByOutputType, T['by']> &
       {
@@ -1388,6 +1388,11 @@ export type portfolioHoldingFindManyArgs<ExtArgs extends runtime.Types.Extension
    * Skip the first `n` portfolioHoldings.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of portfolioHoldings.
+   */
   distinct?: Prisma.PortfolioHoldingScalarFieldEnum | Prisma.PortfolioHoldingScalarFieldEnum[]
 }
 

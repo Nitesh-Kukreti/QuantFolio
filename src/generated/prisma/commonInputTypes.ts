@@ -166,6 +166,13 @@ export type DecimalFilter<$PrismaModel = never> = {
   not?: Prisma.NestedDecimalFilter<$PrismaModel> | runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
+export type EnumPortfolioStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.PortfolioStatus | Prisma.EnumPortfolioStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PortfolioStatus[] | Prisma.ListEnumPortfolioStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PortfolioStatus[] | Prisma.ListEnumPortfolioStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPortfolioStatusFilter<$PrismaModel> | $Enums.PortfolioStatus
+}
+
 export type EnumPortfolioTypeWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.PortfolioType | Prisma.EnumPortfolioTypeFieldRefInput<$PrismaModel>
   in?: $Enums.PortfolioType[] | Prisma.ListEnumPortfolioTypeFieldRefInput<$PrismaModel>
@@ -190,6 +197,16 @@ export type DecimalWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedDecimalFilter<$PrismaModel>
   _min?: Prisma.NestedDecimalFilter<$PrismaModel>
   _max?: Prisma.NestedDecimalFilter<$PrismaModel>
+}
+
+export type EnumPortfolioStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PortfolioStatus | Prisma.EnumPortfolioStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PortfolioStatus[] | Prisma.ListEnumPortfolioStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PortfolioStatus[] | Prisma.ListEnumPortfolioStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPortfolioStatusWithAggregatesFilter<$PrismaModel> | $Enums.PortfolioStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPortfolioStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPortfolioStatusFilter<$PrismaModel>
 }
 
 export type IntFilter<$PrismaModel = never> = {
@@ -384,6 +401,13 @@ export type NestedDecimalFilter<$PrismaModel = never> = {
   not?: Prisma.NestedDecimalFilter<$PrismaModel> | runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
+export type NestedEnumPortfolioStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.PortfolioStatus | Prisma.EnumPortfolioStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PortfolioStatus[] | Prisma.ListEnumPortfolioStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PortfolioStatus[] | Prisma.ListEnumPortfolioStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPortfolioStatusFilter<$PrismaModel> | $Enums.PortfolioStatus
+}
+
 export type NestedEnumPortfolioTypeWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.PortfolioType | Prisma.EnumPortfolioTypeFieldRefInput<$PrismaModel>
   in?: $Enums.PortfolioType[] | Prisma.ListEnumPortfolioTypeFieldRefInput<$PrismaModel>
@@ -408,6 +432,16 @@ export type NestedDecimalWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedDecimalFilter<$PrismaModel>
   _min?: Prisma.NestedDecimalFilter<$PrismaModel>
   _max?: Prisma.NestedDecimalFilter<$PrismaModel>
+}
+
+export type NestedEnumPortfolioStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PortfolioStatus | Prisma.EnumPortfolioStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PortfolioStatus[] | Prisma.ListEnumPortfolioStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PortfolioStatus[] | Prisma.ListEnumPortfolioStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPortfolioStatusWithAggregatesFilter<$PrismaModel> | $Enums.PortfolioStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPortfolioStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPortfolioStatusFilter<$PrismaModel>
 }
 
 export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {

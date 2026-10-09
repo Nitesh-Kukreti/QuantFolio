@@ -69,6 +69,8 @@ model portfolio {
   totalCapital Decimal       @db.Decimal(15, 2)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  status      PortfolioStatus @default(draft)
+  
 
   user     user               @relation(fields: [userId], references: [id], onDelete: Cascade)
   holdings portfolioHolding[]
@@ -106,3 +108,10 @@ enum PortfolioType {
   manual
   ai
 }
+
+enum PortfolioStatus {
+  draft
+  active
+  closed
+}
+

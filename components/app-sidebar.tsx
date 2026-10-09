@@ -45,13 +45,8 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Portfolio",
-      url: "/portfolio",
-      icon: IconUserCircle,
-    },
-    {
-      title: "Strategies",
-      url: "/strategies",
+      title: "Portfolios",
+      url: "/portfolios",
       icon: IconUserCircle,
     },
     {
