@@ -1,70 +1,84 @@
-# Next.js + Better Auth + Prisma Starter Kit
+# QuantFolio
 
-🚀 A starter kit for building modern web applications with **Next.js 16**, **Better Auth**, **Prisma**, and **shadcn/ui**.
+**A Personal Portfolio Management and Quantitative Finance Platform**
 
-🔗 **[Live Demo](https://auth.achour.dev/)**
+QuantFolio is a web application designed to help users create, manage, and analyze investment portfolios. The goal is to combine portfolio tracking with quantitative finance concepts to provide insights into portfolio performance, risk, and projected growth.
 
-<a href="https://www.buymeacoffee.com/achour" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+## Features
 
-## 📌 Features
+- **User Authentication** — Secure user sign-up and login.
+- **Dashboard** — A central interface for navigating portfolio-related features.
+- **Portfolio Management** — Create and manage personal investment portfolios.
+- **Manual Portfolio Creation** — Add selected stocks and other supported assets to a custom portfolio.
+- **Portfolio Analysis** — Explore portfolio performance, risk, and asset allocation.
+- **Growth Projections** — Planned tools to estimate potential portfolio growth using financial models.
 
-- ✅ **Next.js 16** with App Router
-- ✅ **Better Auth** for authentication
-- ✅ **Prisma** for database management (Rust-Free Engine)
-- ✅ **shadcn/ui** for UI components
-- ✅ **Dashboard** for authenticated users
-- ✅ TypeScript support
+*Note: Features are under active development. Availability and completeness may vary.*
 
-## 🆕 Recent Updates
+## Tech Stack
 
-- **Prisma 7**: Updated to the latest version `^7.1.0`.
-- **Tailwind CSS v4**: Now running on Tailwind CSS v4.
+- **Frontend:** Next.js, React, TypeScript
+- **Styling:** Tailwind CSS
+- **Authentication:** Better Auth
+- **Database:** PostgreSQL
+- **ORM:** Prisma
+- **Package Manager:** npm
 
-## 📦 Installation
+## Getting Started
+
+### Prerequisites
+
+Make sure you have the following installed:
+
+- Node.js
+- npm
+- PostgreSQL or a compatible configured database
+
+### Installation
 
 1. Clone the repository:
-   ```sh
-   git clone https://github.com/Achour/nextjs-better-auth.git
-   cd nextjs-better-auth
+
+   ```bash
+   git clone https://github.com/Nitesh-Kukreti/QuantFolio.git
+   cd QuantFolio
    ```
+
 2. Install dependencies:
-   ```sh
+
+   ```bash
    npm install
    ```
-3. Set up environment variables:
 
-   ```sh
-   cp .env.example .env
-   ```
+3. Configure environment variables.
 
-   Fill in the necessary values in the `.env` file.
+   Create a local `.env` file using the project's environment configuration as a reference. Set the required database connection string, authentication secret, and other environment variables.
 
-4. Set up the database:
-
-   ```sh
-   npx prisma migrate dev
-   ```
+4. Set up the database and Prisma according to the project's configuration and migrations.
 
 5. Start the development server:
-   ```sh
+
+   ```bash
    npm run dev
    ```
 
-## 🚀 Usage
+6. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-- Run `npm run dev` to start the development server.
-- Use `npx prisma studio` to manage your database visually.
-- Customize authentication using Better Auth settings.
+*The exact environment variables and database setup commands depend on the current project configuration.*
 
-## 🛠️ Tech Stack
+## Project Status
 
-- **Next.js 16** - React framework
-- **Better Auth** - Authentication
-- **Prisma** - Database ORM (v7)
-- **Tailwind CSS 4** - Utility-first CSS framework
-- **shadcn/ui** - UI components
-- **TypeScript** - Type safety
+QuantFolio is currently under active development. The application is being built incrementally, with the aim of expanding from core authentication and portfolio management into more advanced quantitative analysis.
 
----
+## Future Improvements
 
-Made with ❤️ by [Achour Meguenni](https://github.com/Achour)
+- Real-time or periodically updated market data
+- Portfolio performance visualization
+- Risk and return metrics
+- Asset allocation analysis
+- Historical portfolio backtesting
+- Quantitative growth projections
+- Strategy creation and comparison
+
+## License
+
+A license has not yet been specified. Any third-party code and its applicable license terms remain subject to their original requirements.
