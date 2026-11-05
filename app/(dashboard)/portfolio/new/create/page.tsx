@@ -1,10 +1,12 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import {
   AlertCircle,
   ArrowRight,
   Check,
+  Loader2,
   Plus,
   Search,
   Trash2,
@@ -17,7 +19,8 @@ import { Input } from "@/components/ui/input"
 type Stock = {
   symbol: string
   name: string
-  price: number
+  ltp: number
+  instrumentKey: string
 }
 
 type Holding = {
@@ -25,40 +28,8 @@ type Holding = {
   name: string
   price: number
   quantity: number
+  instrumentKey: string
 }
-
-const stocks: Stock[] = [
-  {
-    symbol: "TCS",
-    name: "Tata Consultancy Services",
-    price: 3421.5,
-  },
-  {
-    symbol: "RELIANCE",
-    name: "Reliance Industries",
-    price: 1450.25,
-  },
-  {
-    symbol: "HDFCBANK",
-    name: "HDFC Bank",
-    price: 980.4,
-  },
-  {
-    symbol: "INFY",
-    name: "Infosys",
-    price: 1542.3,
-  },
-  {
-    symbol: "ICICIBANK",
-    name: "ICICI Bank",
-    price: 1280.75,
-  },
-  {
-    symbol: "ITC",
-    name: "ITC Limited",
-    price: 462.2,
-  },
-]
 
 const formatINR = (value: number) =>
   new Intl.NumberFormat("en-IN", {
@@ -68,76 +39,126 @@ const formatINR = (value: number) =>
   }).format(value)
 
 export default function CreatePortfolioPage() {
-  const [totalCapital, setTotalCapital] = useState<number>(100000)
+  const router = useRouter()
+
+  const [totalCapital, setTotalCapital] = useState(100000)
+  const [portfolioName, setPortfolioName] = useState("")
   const [search, setSearch] = useState("")
+  const [searchResults, setSearchResults] = useState<Stock[]>([])
   const [holdings, setHoldings] = useState<Holding[]>([])
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null)
   const [quantity, setQuantity] = useState(1)
 
-  const investedAmount = useMemo(() => {
-    return holdings.reduce(
-      (total, holding) => total + holding.price * holding.quantity,
-      0
-    )
-  }, [holdings])
+  const [isSearching, setIsSearching] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [hasSearched, setHasSearched] = useState(false)
+  const [searchError, setSearchError] = useState("")
+  const [saveError, setSaveError] = useState("")
+
+  // Portfolio calculations
+  const investedAmount = useMemo(
+    () =>
+      holdings.reduce(
+        (total, holding) => total + holding.price * holding.quantity,
+        0
+      ),
+    [holdings]
+  )
 
   const remainingCapital = totalCapital - investedAmount
 
   const allocationPercentage =
     totalCapital > 0 ? (investedAmount / totalCapital) * 100 : 0
 
-  const filteredStocks = stocks.filter((stock) => {
-    const query = search.toLowerCase()
-
-    return (
-      stock.symbol.toLowerCase().includes(query) ||
-      stock.name.toLowerCase().includes(query)
-    )
-  })
+  const existingHolding = selectedStock
+    ? holdings.find(
+        (holding) => holding.instrumentKey === selectedStock.instrumentKey
+      )
+    : undefined
 
   const selectedInvestment = selectedStock
-    ? selectedStock.price * quantity
+    ? selectedStock.ltp * quantity
+    : 0
+
+  // Only the additional shares need to fit within remaining capital.
+  const additionalInvestment = selectedStock
+    ? selectedStock.ltp * quantity
     : 0
 
   const canAffordSelected =
     selectedStock !== null &&
-    selectedInvestment <= remainingCapital &&
+    Number.isInteger(quantity) &&
+    quantity > 0 &&
+    additionalInvestment <= remainingCapital &&
     totalCapital > 0
 
-  const existingHolding = selectedStock
-    ? holdings.find((holding) => holding.symbol === selectedStock.symbol)
-    : null
+  // Search stocks
+  const handleSearch = async () => {
+    const query = search.trim()
 
-  const selectStock = (stock: Stock) => {
-    setSelectedStock(stock)
+    if (query.length < 2) {
+      setSearchError("Enter at least 2 characters")
+      return
+    }
 
-    const existing = holdings.find(
-      (holding) => holding.symbol === stock.symbol
-    )
+    try {
+      setIsSearching(true)
+      setSearchError("")
+      setHasSearched(true)
 
-    setQuantity(existing ? existing.quantity : 1)
-  }
+      const response = await fetch(
+        `/api/market/search?q=${encodeURIComponent(query)}`
+      )
 
-  const increaseQuantity = () => {
-    if (!selectedStock) return
+      const result = await response.json()
 
-    const nextInvestment = selectedStock.price * (quantity + 1)
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to search stocks")
+      }
 
-    if (nextInvestment <= remainingCapital) {
-      setQuantity((current) => current + 1)
+      const normalizedStocks: Stock[] = (result.data || [])
+        .filter(
+          (stock: any) =>
+            stock.instrument_key &&
+            stock.trading_symbol &&
+            stock.name &&
+            typeof stock.ltp === "number" &&
+            Number.isFinite(stock.ltp) &&
+            stock.ltp > 0
+        )
+        .map((stock: any) => ({
+          symbol: stock.trading_symbol,
+          name: stock.name,
+          ltp: stock.ltp,
+          instrumentKey: stock.instrument_key,
+        }))
+
+      setSearchResults(normalizedStocks)
+    } catch (error) {
+      setSearchResults([])
+      setSearchError(
+        error instanceof Error ? error.message : "Something went wrong"
+      )
+    } finally {
+      setIsSearching(false)
     }
   }
 
-  const decreaseQuantity = () => {
-    setQuantity((current) => Math.max(1, current - 1))
+  // Select a stock
+  const selectStock = (stock: Stock) => {
+    setSelectedStock(stock)
+    setQuantity(1)
+    setSaveError("")
   }
 
+  // Add selected stock to portfolio
   const addToPortfolio = () => {
     if (!selectedStock || !canAffordSelected) return
 
     setHoldings((current) => {
       const existingIndex = current.findIndex(
-        (holding) => holding.symbol === selectedStock.symbol
+        (holding) =>
+          holding.instrumentKey === selectedStock.instrumentKey
       )
 
       if (existingIndex !== -1) {
@@ -146,6 +167,7 @@ export default function CreatePortfolioPage() {
             ? {
                 ...holding,
                 quantity: holding.quantity + quantity,
+                price: selectedStock.ltp,
               }
             : holding
         )
@@ -156,8 +178,9 @@ export default function CreatePortfolioPage() {
         {
           symbol: selectedStock.symbol,
           name: selectedStock.name,
-          price: selectedStock.price,
+          price: selectedStock.ltp,
           quantity,
+          instrumentKey: selectedStock.instrumentKey,
         },
       ]
     })
@@ -166,36 +189,90 @@ export default function CreatePortfolioPage() {
     setQuantity(1)
   }
 
-  const removeHolding = (symbol: string) => {
+  // Remove a holding
+  const removeHolding = (instrumentKey: string) => {
     setHoldings((current) =>
-      current.filter((holding) => holding.symbol !== symbol)
+      current.filter(
+        (holding) => holding.instrumentKey !== instrumentKey
+      )
     )
+  }
+
+  // Save portfolio
+  const handleSavePortfolio = async () => {
+    if (
+      !portfolioName.trim() ||
+      holdings.length === 0 ||
+      totalCapital <= 0 ||
+      investedAmount > totalCapital ||
+      isSaving
+    ) {
+      return
+    }
+
+    try {
+      setIsSaving(true)
+      setSaveError("")
+
+      const payload = {
+        name: portfolioName.trim(),
+        type: "manual",
+        totalCapital,
+        holdings: holdings.map((holding) => ({
+          instrumentKey: holding.instrumentKey,
+          quantity: holding.quantity,
+        })),
+      }
+
+      const response = await fetch("/api/portfolio", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to create portfolio")
+      }
+
+      router.push("/portfolio")
+      router.refresh()
+    } catch (error) {
+      setSaveError(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong while saving the portfolio"
+      )
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
     <main className="min-h-screen bg-background px-4 py-5 lg:px-6">
       <div className="mx-auto max-w-[1500px] space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="mb-1 flex items-center gap-2">
-              <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
-                Manual Portfolio
-              </span>
+        <div>
+          <div className="mb-1 flex items-center gap-2">
+            <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+              Manual Portfolio
+            </span>
 
-              <span className="text-xs text-muted-foreground">
-                Step 1 of 2
-              </span>
-            </div>
-
-            <h1 className="text-xl font-semibold tracking-tight">
-              Build your portfolio
-            </h1>
-
-            <p className="text-sm text-muted-foreground">
-              Select stocks and allocate your investment capital.
-            </p>
+            <span className="text-xs text-muted-foreground">
+              Step 1 of 2
+            </span>
           </div>
+
+          <h1 className="text-xl font-semibold tracking-tight">
+            Build your portfolio
+          </h1>
+
+          <p className="text-sm text-muted-foreground">
+            Select stocks and allocate your investment capital.
+          </p>
         </div>
 
         {/* Capital Summary */}
@@ -214,7 +291,6 @@ export default function CreatePortfolioPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            {/* Total Capital */}
             <div className="rounded-lg border bg-blue-500/5 p-3">
               <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">
                 Total Capital
@@ -231,7 +307,6 @@ export default function CreatePortfolioPage() {
               />
             </div>
 
-            {/* Invested */}
             <div className="rounded-lg border bg-emerald-500/5 p-3">
               <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
                 Invested
@@ -242,7 +317,6 @@ export default function CreatePortfolioPage() {
               </p>
             </div>
 
-            {/* Remaining */}
             <div className="rounded-lg border bg-amber-500/5 p-3">
               <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400">
                 Remaining
@@ -259,7 +333,6 @@ export default function CreatePortfolioPage() {
               </p>
             </div>
 
-            {/* Allocation */}
             <div className="rounded-lg border bg-violet-500/5 p-3">
               <div className="mb-1 flex items-center justify-between">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-violet-600 dark:text-violet-400">
@@ -284,7 +357,7 @@ export default function CreatePortfolioPage() {
         </section>
 
         {/* Main Workspace */}
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <div className="grid gap-4 lg:grid-cols-2">
           {/* Search & Select */}
           <section className="rounded-xl border bg-card shadow-sm">
             <div className="border-b px-4 py-3">
@@ -297,40 +370,63 @@ export default function CreatePortfolioPage() {
                 </div>
 
                 <span className="rounded-full bg-muted px-2 py-1 text-[11px] font-medium text-muted-foreground">
-                  {filteredStocks.length} stocks
+                  {searchResults.length} stocks
                 </span>
               </div>
 
-              {/* Search */}
-              <div className="relative mt-3">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <div className="mt-3 flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
-                <Input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search by stock name or symbol..."
-                  className="h-9 pl-9"
-                />
+                  <Input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search by stock name or symbol..."
+                    className="h-9 pl-9"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSearch()
+                    }}
+                  />
+                </div>
+
+                <Button
+                  size="sm"
+                  className="h-9"
+                  onClick={handleSearch}
+                  disabled={!search.trim() || isSearching}
+                >
+                  {isSearching ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Search className="h-4 w-4" />
+                  )}
+                  Search
+                </Button>
               </div>
+
+              {searchError && (
+                <p className="mt-2 text-xs text-red-600">{searchError}</p>
+              )}
             </div>
 
             <div className="divide-y">
-              {filteredStocks.map((stock) => {
-                const isSelected = selectedStock?.symbol === stock.symbol
+              {searchResults.map((stock) => {
+                const isSelected =
+                  selectedStock?.instrumentKey === stock.instrumentKey
 
                 const held = holdings.find(
-                  (holding) => holding.symbol === stock.symbol
+                  (holding) =>
+                    holding.instrumentKey === stock.instrumentKey
                 )
 
                 return (
                   <div
-                    key={stock.symbol}
+                    key={stock.instrumentKey}
                     className={`px-4 py-3 transition-colors ${
                       isSelected ? "bg-primary/5" : "hover:bg-muted/40"
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      {/* Stock Identity */}
                       <button
                         type="button"
                         onClick={() => selectStock(stock)}
@@ -353,10 +449,9 @@ export default function CreatePortfolioPage() {
                         </p>
                       </button>
 
-                      {/* Price */}
                       <div className="text-right">
                         <p className="text-sm font-semibold">
-                          {formatINR(stock.price)}
+                          {formatINR(stock.ltp)}
                         </p>
 
                         <p className="text-[10px] text-muted-foreground">
@@ -364,7 +459,6 @@ export default function CreatePortfolioPage() {
                         </p>
                       </div>
 
-                      {/* Select */}
                       <Button
                         size="icon"
                         variant={isSelected ? "default" : "outline"}
@@ -379,13 +473,12 @@ export default function CreatePortfolioPage() {
                       </Button>
                     </div>
 
-                    {/* Inline Quantity Selector */}
                     {isSelected && (
                       <div className="mt-3 rounded-lg border bg-background p-3">
                         <div className="grid grid-cols-[1fr_auto_auto] items-center gap-4">
                           <div>
                             <p className="text-xs font-medium">
-                              Quantity
+                              Additional quantity
                             </p>
 
                             <p className="text-[11px] text-muted-foreground">
@@ -396,22 +489,23 @@ export default function CreatePortfolioPage() {
                             </p>
                           </div>
 
-                        <div className="flex items-center gap-2">
-
-
-                        <Input
-                        type="number"
+                          <Input
+                            type="number"
+                            min="1"
+                            step="1"
                             value={quantity}
                             onChange={(e) => {
-                            const value = Number(e.target.value)
-                            
-                            if(value < 0) setQuantity(0)
-                            else setQuantity(value)
-                            }}
-                            className="h-8 w-16 text-center text-sm font-semibold"
-                        />
+                              const value = Number(e.target.value)
 
-                        </div>
+                              setQuantity(
+                                Number.isFinite(value)
+                                  ? Math.max(0, Math.floor(value))
+                                  : 0
+                              )
+                            }}
+                            className="h-8 w-20 text-center text-sm font-semibold"
+                          />
+
                           <Button
                             type="button"
                             size="sm"
@@ -429,7 +523,8 @@ export default function CreatePortfolioPage() {
                             <AlertCircle className="h-3.5 w-3.5" />
 
                             <span>
-                              Not enough remaining capital for this quantity.
+                              Enter a valid quantity and ensure you have enough
+                              remaining capital.
                             </span>
                           </div>
                         )}
@@ -439,9 +534,16 @@ export default function CreatePortfolioPage() {
                 )
               })}
 
-              {filteredStocks.length === 0 && (
+              {searchResults.length === 0 && (
                 <div className="px-4 py-10 text-center">
-                  <p className="text-sm font-medium">No stocks found</p>
+                  <p className="text-sm font-medium">
+                    {isSearching
+                      ? "Searching stocks..."
+                      : hasSearched
+                        ? "No stocks found"
+                        : "Search for a stock"}
+                  </p>
+
                   <p className="mt-1 text-xs text-muted-foreground">
                     Try another stock name or symbol.
                   </p>
@@ -484,102 +586,116 @@ export default function CreatePortfolioPage() {
                 </div>
               </div>
             ) : (
-              <>
-                <div className="divide-y">
-                  {holdings.map((holding) => {
-                    const investment =
-                      holding.price * holding.quantity
+              <div className="divide-y">
+                {holdings.map((holding) => {
+                  const investment = holding.price * holding.quantity
 
-                    return (
-                      <div
-                        key={holding.symbol}
-                        className="flex items-center gap-3 px-4 py-3"
-                      >
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                          {holding.symbol.slice(0, 2)}
-                        </div>
-
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-semibold">
-                              {holding.symbol}
-                            </p>
-
-                            <span className="text-[11px] text-muted-foreground">
-                              {holding.quantity} shares
-                            </span>
-                          </div>
-
-                          <p className="truncate text-xs text-muted-foreground">
-                            {holding.name}
-                          </p>
-                        </div>
-
-                        <div className="text-right">
-                          <p className="text-sm font-semibold">
-                            {formatINR(investment)}
-                          </p>
-
-                          <p className="text-[10px] text-muted-foreground">
-                            {formatINR(holding.price)} / share
-                          </p>
-                        </div>
-
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 shrink-0 text-muted-foreground hover:bg-red-500/10 hover:text-red-600"
-                          onClick={() => removeHolding(holding.symbol)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
+                  return (
+                    <div
+                      key={holding.instrumentKey}
+                      className="flex items-center gap-3 px-4 py-3"
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                        {holding.symbol.slice(0, 2)}
                       </div>
-                    )
-                  })}
-                </div>
-              </>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold">
+                            {holding.symbol}
+                          </p>
+
+                          <span className="text-[11px] text-muted-foreground">
+                            {holding.quantity} shares
+                          </span>
+                        </div>
+
+                        <p className="truncate text-xs text-muted-foreground">
+                          {holding.name}
+                        </p>
+                      </div>
+
+                      <div className="text-right">
+                        <p className="text-sm font-semibold">
+                          {formatINR(investment)}
+                        </p>
+
+                        <p className="text-[10px] text-muted-foreground">
+                          {formatINR(holding.price)} / share
+                        </p>
+                      </div>
+
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0 text-muted-foreground hover:bg-red-500/10 hover:text-red-600"
+                        onClick={() =>
+                          removeHolding(holding.instrumentKey)
+                        }
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )
+                })}
+              </div>
             )}
           </section>
         </div>
 
-        {/* Actions - Full Width */}
+        {/* Save Portfolio */}
         <section className="rounded-xl border bg-card p-4 shadow-sm">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-4">
             <div>
-              <p className="text-sm font-semibold">What would you like to do?</p>
-
+              <p className="text-sm font-semibold">Save Your Portfolio</p>
               <p className="text-xs text-muted-foreground">
-                Save this portfolio or continue with strategy analysis.
+                Give your portfolio a name before saving it.
               </p>
             </div>
 
-            <div className="flex w-full gap-2 md:w-auto">
-              <Button
-                type="button"
-                className="h-10 flex-1 md:min-w-[190px]"
-                disabled={holdings.length === 0 || totalCapital <= 0}
-                onClick={() => {
-                  // Keep your existing portfolio action here
-                }}
-              >
-                Add to Portfolio
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="portfolioName" className="text-sm font-medium">
+                Portfolio Name
+              </label>
 
-              <Button
-                type="button"
-                variant="outline"
-                className="h-10 flex-1 border-violet-500/30 text-violet-600 hover:bg-violet-500/10 hover:text-violet-600 dark:text-violet-400 dark:hover:text-violet-400 md:min-w-[190px]"
-                disabled={holdings.length === 0 || totalCapital <= 0}
-                onClick={() => {
-                  // Keep your existing strategy action here
-                }}
-              >
-                Add to Strategy
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <Input
+                id="portfolioName"
+                placeholder="e.g. Long-Term Growth Portfolio"
+                value={portfolioName}
+                onChange={(e) => setPortfolioName(e.target.value)}
+                maxLength={100}
+              />
             </div>
+
+            {saveError && (
+              <p className="text-sm text-red-600">{saveError}</p>
+            )}
+
+            <Button
+              type="button"
+              className="h-10 w-full md:w-auto md:min-w-[190px]"
+              disabled={
+                isSaving ||
+                holdings.length === 0 ||
+                totalCapital <= 0 ||
+                !portfolioName.trim() ||
+                investedAmount > totalCapital
+              }
+              onClick={handleSavePortfolio}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  Add to Portfolio
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </Button>
           </div>
         </section>
       </div>

@@ -46,7 +46,7 @@ const data = {
     },
     {
       title: "Portfolios",
-      url: "/portfolios",
+      url: "/portfolio",
       icon: IconUserCircle,
     },
     {

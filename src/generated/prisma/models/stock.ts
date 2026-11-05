@@ -27,6 +27,7 @@ export type AggregateStock = {
 export type StockMinAggregateOutputType = {
   id: string | null
   symbol: string | null
+  instrumentKey: string | null
   name: string | null
   exchange: string | null
   sector: string | null
@@ -38,6 +39,7 @@ export type StockMinAggregateOutputType = {
 export type StockMaxAggregateOutputType = {
   id: string | null
   symbol: string | null
+  instrumentKey: string | null
   name: string | null
   exchange: string | null
   sector: string | null
@@ -49,6 +51,7 @@ export type StockMaxAggregateOutputType = {
 export type StockCountAggregateOutputType = {
   id: number
   symbol: number
+  instrumentKey: number
   name: number
   exchange: number
   sector: number
@@ -62,6 +65,7 @@ export type StockCountAggregateOutputType = {
 export type StockMinAggregateInputType = {
   id?: true
   symbol?: true
+  instrumentKey?: true
   name?: true
   exchange?: true
   sector?: true
@@ -73,6 +77,7 @@ export type StockMinAggregateInputType = {
 export type StockMaxAggregateInputType = {
   id?: true
   symbol?: true
+  instrumentKey?: true
   name?: true
   exchange?: true
   sector?: true
@@ -84,6 +89,7 @@ export type StockMaxAggregateInputType = {
 export type StockCountAggregateInputType = {
   id?: true
   symbol?: true
+  instrumentKey?: true
   name?: true
   exchange?: true
   sector?: true
@@ -168,8 +174,9 @@ export type stockGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type StockGroupByOutputType = {
   id: string
   symbol: string
+  instrumentKey: string
   name: string
-  exchange: string | null
+  exchange: string
   sector: string | null
   isin: string | null
   createdAt: Date
@@ -200,8 +207,9 @@ export type stockWhereInput = {
   NOT?: Prisma.stockWhereInput | Prisma.stockWhereInput[]
   id?: Prisma.StringFilter<"stock"> | string
   symbol?: Prisma.StringFilter<"stock"> | string
+  instrumentKey?: Prisma.StringFilter<"stock"> | string
   name?: Prisma.StringFilter<"stock"> | string
-  exchange?: Prisma.StringNullableFilter<"stock"> | string | null
+  exchange?: Prisma.StringFilter<"stock"> | string
   sector?: Prisma.StringNullableFilter<"stock"> | string | null
   isin?: Prisma.StringNullableFilter<"stock"> | string | null
   createdAt?: Prisma.DateTimeFilter<"stock"> | Date | string
@@ -212,8 +220,9 @@ export type stockWhereInput = {
 export type stockOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   symbol?: Prisma.SortOrder
+  instrumentKey?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  exchange?: Prisma.SortOrderInput | Prisma.SortOrder
+  exchange?: Prisma.SortOrder
   sector?: Prisma.SortOrderInput | Prisma.SortOrder
   isin?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -223,24 +232,27 @@ export type stockOrderByWithRelationInput = {
 
 export type stockWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  symbol?: string
+  instrumentKey?: string
+  symbol_exchange?: Prisma.stockSymbolExchangeCompoundUniqueInput
   AND?: Prisma.stockWhereInput | Prisma.stockWhereInput[]
   OR?: Prisma.stockWhereInput[]
   NOT?: Prisma.stockWhereInput | Prisma.stockWhereInput[]
+  symbol?: Prisma.StringFilter<"stock"> | string
   name?: Prisma.StringFilter<"stock"> | string
-  exchange?: Prisma.StringNullableFilter<"stock"> | string | null
+  exchange?: Prisma.StringFilter<"stock"> | string
   sector?: Prisma.StringNullableFilter<"stock"> | string | null
   isin?: Prisma.StringNullableFilter<"stock"> | string | null
   createdAt?: Prisma.DateTimeFilter<"stock"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"stock"> | Date | string
   holdings?: Prisma.PortfolioHoldingListRelationFilter
-}, "id" | "symbol">
+}, "id" | "instrumentKey" | "symbol_exchange">
 
 export type stockOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   symbol?: Prisma.SortOrder
+  instrumentKey?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  exchange?: Prisma.SortOrderInput | Prisma.SortOrder
+  exchange?: Prisma.SortOrder
   sector?: Prisma.SortOrderInput | Prisma.SortOrder
   isin?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -256,8 +268,9 @@ export type stockScalarWhereWithAggregatesInput = {
   NOT?: Prisma.stockScalarWhereWithAggregatesInput | Prisma.stockScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"stock"> | string
   symbol?: Prisma.StringWithAggregatesFilter<"stock"> | string
+  instrumentKey?: Prisma.StringWithAggregatesFilter<"stock"> | string
   name?: Prisma.StringWithAggregatesFilter<"stock"> | string
-  exchange?: Prisma.StringNullableWithAggregatesFilter<"stock"> | string | null
+  exchange?: Prisma.StringWithAggregatesFilter<"stock"> | string
   sector?: Prisma.StringNullableWithAggregatesFilter<"stock"> | string | null
   isin?: Prisma.StringNullableWithAggregatesFilter<"stock"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"stock"> | Date | string
@@ -267,8 +280,9 @@ export type stockScalarWhereWithAggregatesInput = {
 export type stockCreateInput = {
   id?: string
   symbol: string
+  instrumentKey: string
   name: string
-  exchange?: string | null
+  exchange: string
   sector?: string | null
   isin?: string | null
   createdAt?: Date | string
@@ -279,8 +293,9 @@ export type stockCreateInput = {
 export type stockUncheckedCreateInput = {
   id?: string
   symbol: string
+  instrumentKey: string
   name: string
-  exchange?: string | null
+  exchange: string
   sector?: string | null
   isin?: string | null
   createdAt?: Date | string
@@ -291,8 +306,9 @@ export type stockUncheckedCreateInput = {
 export type stockUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
+  instrumentKey?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  exchange?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  exchange?: Prisma.StringFieldUpdateOperationsInput | string
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -303,8 +319,9 @@ export type stockUpdateInput = {
 export type stockUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
+  instrumentKey?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  exchange?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  exchange?: Prisma.StringFieldUpdateOperationsInput | string
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -315,8 +332,9 @@ export type stockUncheckedUpdateInput = {
 export type stockCreateManyInput = {
   id?: string
   symbol: string
+  instrumentKey: string
   name: string
-  exchange?: string | null
+  exchange: string
   sector?: string | null
   isin?: string | null
   createdAt?: Date | string
@@ -326,8 +344,9 @@ export type stockCreateManyInput = {
 export type stockUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
+  instrumentKey?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  exchange?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  exchange?: Prisma.StringFieldUpdateOperationsInput | string
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -337,8 +356,9 @@ export type stockUpdateManyMutationInput = {
 export type stockUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
+  instrumentKey?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  exchange?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  exchange?: Prisma.StringFieldUpdateOperationsInput | string
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -350,9 +370,15 @@ export type StockScalarRelationFilter = {
   isNot?: Prisma.stockWhereInput
 }
 
+export type stockSymbolExchangeCompoundUniqueInput = {
+  symbol: string
+  exchange: string
+}
+
 export type stockCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   symbol?: Prisma.SortOrder
+  instrumentKey?: Prisma.SortOrder
   name?: Prisma.SortOrder
   exchange?: Prisma.SortOrder
   sector?: Prisma.SortOrder
@@ -364,6 +390,7 @@ export type stockCountOrderByAggregateInput = {
 export type stockMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   symbol?: Prisma.SortOrder
+  instrumentKey?: Prisma.SortOrder
   name?: Prisma.SortOrder
   exchange?: Prisma.SortOrder
   sector?: Prisma.SortOrder
@@ -375,6 +402,7 @@ export type stockMaxOrderByAggregateInput = {
 export type stockMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   symbol?: Prisma.SortOrder
+  instrumentKey?: Prisma.SortOrder
   name?: Prisma.SortOrder
   exchange?: Prisma.SortOrder
   sector?: Prisma.SortOrder
@@ -400,8 +428,9 @@ export type stockUpdateOneRequiredWithoutHoldingsNestedInput = {
 export type stockCreateWithoutHoldingsInput = {
   id?: string
   symbol: string
+  instrumentKey: string
   name: string
-  exchange?: string | null
+  exchange: string
   sector?: string | null
   isin?: string | null
   createdAt?: Date | string
@@ -411,8 +440,9 @@ export type stockCreateWithoutHoldingsInput = {
 export type stockUncheckedCreateWithoutHoldingsInput = {
   id?: string
   symbol: string
+  instrumentKey: string
   name: string
-  exchange?: string | null
+  exchange: string
   sector?: string | null
   isin?: string | null
   createdAt?: Date | string
@@ -438,8 +468,9 @@ export type stockUpdateToOneWithWhereWithoutHoldingsInput = {
 export type stockUpdateWithoutHoldingsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
+  instrumentKey?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  exchange?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  exchange?: Prisma.StringFieldUpdateOperationsInput | string
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -449,8 +480,9 @@ export type stockUpdateWithoutHoldingsInput = {
 export type stockUncheckedUpdateWithoutHoldingsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
+  instrumentKey?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  exchange?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  exchange?: Prisma.StringFieldUpdateOperationsInput | string
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -491,6 +523,7 @@ export type StockCountOutputTypeCountHoldingsArgs<ExtArgs extends runtime.Types.
 export type stockSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   symbol?: boolean
+  instrumentKey?: boolean
   name?: boolean
   exchange?: boolean
   sector?: boolean
@@ -504,6 +537,7 @@ export type stockSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
 export type stockSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   symbol?: boolean
+  instrumentKey?: boolean
   name?: boolean
   exchange?: boolean
   sector?: boolean
@@ -515,6 +549,7 @@ export type stockSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type stockSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   symbol?: boolean
+  instrumentKey?: boolean
   name?: boolean
   exchange?: boolean
   sector?: boolean
@@ -526,6 +561,7 @@ export type stockSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type stockSelectScalar = {
   id?: boolean
   symbol?: boolean
+  instrumentKey?: boolean
   name?: boolean
   exchange?: boolean
   sector?: boolean
@@ -534,7 +570,7 @@ export type stockSelectScalar = {
   updatedAt?: boolean
 }
 
-export type stockOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "symbol" | "name" | "exchange" | "sector" | "isin" | "createdAt" | "updatedAt", ExtArgs["result"]["stock"]>
+export type stockOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "symbol" | "instrumentKey" | "name" | "exchange" | "sector" | "isin" | "createdAt" | "updatedAt", ExtArgs["result"]["stock"]>
 export type stockInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   holdings?: boolean | Prisma.stock$holdingsArgs<ExtArgs>
   _count?: boolean | Prisma.StockCountOutputTypeDefaultArgs<ExtArgs>
@@ -550,8 +586,9 @@ export type $stockPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     symbol: string
+    instrumentKey: string
     name: string
-    exchange: string | null
+    exchange: string
     sector: string | null
     isin: string | null
     createdAt: Date
@@ -982,6 +1019,7 @@ export interface Prisma__stockClient<T, Null = never, ExtArgs extends runtime.Ty
 export interface stockFieldRefs {
   readonly id: Prisma.FieldRef<"stock", 'String'>
   readonly symbol: Prisma.FieldRef<"stock", 'String'>
+  readonly instrumentKey: Prisma.FieldRef<"stock", 'String'>
   readonly name: Prisma.FieldRef<"stock", 'String'>
   readonly exchange: Prisma.FieldRef<"stock", 'String'>
   readonly sector: Prisma.FieldRef<"stock", 'String'>

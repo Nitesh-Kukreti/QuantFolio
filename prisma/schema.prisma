@@ -1,117 +1,121 @@
-generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
-}
+  generator client {
+    provider = "prisma-client"
+    output   = "../src/generated/prisma"
+  }
 
-datasource db {
-  provider = "postgresql"
-}
+  datasource db {
+    provider = "postgresql"
+  }
 
-model account {
-  id                    String    @id
-  accountId             String
-  providerId            String
-  userId                String
-  accessToken           String?
-  refreshToken          String?
-  idToken               String?
-  accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
-  scope                 String?
-  password              String?
-  createdAt             DateTime
-  updatedAt             DateTime
+  model account {
+    id                    String    @id
+    accountId             String
+    providerId            String
+    userId                String
+    accessToken           String?
+    refreshToken          String?
+    idToken               String?
+    accessTokenExpiresAt  DateTime?
+    refreshTokenExpiresAt DateTime?
+    scope                 String?
+    password              String?
+    createdAt             DateTime
+    updatedAt             DateTime
 
-  user user @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
+    user user @relation(fields: [userId], references: [id], onDelete: Cascade)
+  }
 
-model session {
-  id        String   @id
-  expiresAt DateTime
-  token     String   @unique
-  createdAt DateTime
-  updatedAt DateTime
-  ipAddress String?
-  userAgent String?
-  userId    String
+  model session {
+    id        String   @id
+    expiresAt DateTime
+    token     String   @unique
+    createdAt DateTime
+    updatedAt DateTime
+    ipAddress String?
+    userAgent String?
+    userId    String
 
-  user user @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
+    user user @relation(fields: [userId], references: [id], onDelete: Cascade)
+  }
 
-model user {
-  id            String    @id
-  name          String
-  email         String    @unique
-  emailVerified Boolean
-  image         String?
-  createdAt     DateTime
-  updatedAt     DateTime
+  model user {
+    id            String    @id
+    name          String
+    email         String    @unique
+    emailVerified Boolean
+    image         String?
+    createdAt     DateTime
+    updatedAt     DateTime
 
-  account   account[]
-  session   session[]
-  portfolio portfolio[]
-}
+    account   account[]
+    session   session[]
+    portfolio portfolio[]
+  }
 
-model verification {
-  id         String    @id
-  identifier String
-  value      String
-  expiresAt  DateTime
-  createdAt  DateTime?
-  updatedAt  DateTime?
-}
+  model verification {
+    id         String    @id
+    identifier String
+    value      String
+    expiresAt  DateTime
+    createdAt  DateTime?
+    updatedAt  DateTime?
+  }
 
-model portfolio {
-  id           String        @id @default(uuid())
-  userId       String
-  name         String
-  type         PortfolioType
-  totalCapital Decimal       @db.Decimal(15, 2)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  status      PortfolioStatus @default(draft)
-  
+  model portfolio {
+    id           String        @id @default(uuid())
+    userId       String
+    name         String
+    type         PortfolioType
+    totalCapital Decimal       @db.Decimal(15, 2)
+    createdAt    DateTime      @default(now())
+    updatedAt    DateTime      @updatedAt
+    status      PortfolioStatus @default(draft)
+    
 
-  user     user               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  holdings portfolioHolding[]
-}
+    user     user               @relation(fields: [userId], references: [id], onDelete: Cascade)
+    holdings portfolioHolding[]
+  }
 
-model portfolioHolding {
+  model portfolioHolding {
+    id            String   @id @default(uuid())
+    portfolioId   String
+    stockId       String
+    quantity      Int
+    purchasePrice Decimal  @db.Decimal(15, 2)
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+
+    portfolio portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+    stock     stock     @relation(fields: [stockId], references: [id])
+
+    @@unique([portfolioId, stockId])
+  }
+
+model stock {
   id            String   @id @default(uuid())
-  portfolioId   String
-  stockId       String
-  quantity      Int
-  purchasePrice Decimal  @db.Decimal(15, 2)
+  symbol        String
+  instrumentKey String   @unique
+  name          String
+  exchange      String
+  sector        String?
+  isin          String?
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  portfolio portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
-  stock     stock     @relation(fields: [stockId], references: [id])
+  holdings      portfolioHolding[]
 
-  @@unique([portfolioId, stockId])
+  @@unique([symbol, exchange])
 }
 
-model stock {
-  id        String   @id @default(uuid())
-  symbol    String   @unique
-  name      String
-  exchange  String?
-  sector    String?
-  isin      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  enum PortfolioType {
+    manual
+    ai
+  }
 
-  holdings portfolioHolding[]
-}
-
-enum PortfolioType {
-  manual
-  ai
-}
-
-enum PortfolioStatus {
-  draft
-  active
-  closed
-}
+  enum PortfolioStatus {
+    draft
+    active
+    closed
+  }
 

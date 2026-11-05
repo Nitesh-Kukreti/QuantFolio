@@ -1068,6 +1068,7 @@ export type PortfolioHoldingScalarFieldEnum = (typeof PortfolioHoldingScalarFiel
 export const StockScalarFieldEnum = {
   id: 'id',
   symbol: 'symbol',
+  instrumentKey: 'instrumentKey',
   name: 'name',
   exchange: 'exchange',
   sector: 'sector',

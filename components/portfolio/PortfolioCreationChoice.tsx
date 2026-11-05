@@ -75,7 +75,7 @@ export default function PortfolioCreationChoice() {
               variant="outline"
               onClick={(e) => {
                 e.stopPropagation()
-                router.push("/portfolios/new/create")
+                router.push("/portfolio/new/create")
               }}
             >
               Start building
@@ -132,7 +132,7 @@ export default function PortfolioCreationChoice() {
               className="mt-8 w-full"
               onClick={(e) => {
                 e.stopPropagation()
-                router.push("/portfolios/new/generate")
+                router.push("/portfolio/new/generate")
               }}
             >
               Generate portfolio
