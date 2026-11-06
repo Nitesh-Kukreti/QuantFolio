@@ -238,7 +238,7 @@ export default function CreatePortfolioPage() {
         throw new Error(result.error || "Failed to create portfolio")
       }
 
-      router.push("/portfolio")
+      router.push("/portfolios")
       router.refresh()
     } catch (error) {
       setSaveError(

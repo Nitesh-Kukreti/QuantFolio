@@ -4,6 +4,7 @@ import { Prisma } from "@src/generated/prisma/client";
 
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { getLatestPrices } from "@/lib/market-data/getLatestPrices";
 
 export async function GET() {
   try {
@@ -20,6 +21,17 @@ export async function GET() {
         userId: session.user.id,
       },
       include: {
+        holdings: {
+          select: {
+            quantity: true,
+            purchasePrice: true,
+            stock: {
+              select: {
+                instrumentKey: true,
+              },
+            },
+          },
+        },
         _count: {
           select: {
             holdings: true,
@@ -31,7 +43,66 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ portfolios }, { status: 200 });
+    const instrumentKeys = [
+      ...new Set(
+        portfolios.flatMap((portfolio) =>
+          portfolio.holdings.map((holding) => holding.stock.instrumentKey),
+        ),
+      ),
+    ];
+
+    const priceMap = await getLatestPrices(instrumentKeys);
+
+    const updatedPortfolios = portfolios.map((portfolio) => {
+      let investedCapital = 0;
+      let currentValue = 0;
+      let allPricesAvailable = portfolio.holdings.length > 0;
+
+      const updatedHoldings = portfolio.holdings.map((holding) => {
+        const quantity = Number(holding.quantity);
+        const purchasePrice = Number(holding.purchasePrice);
+
+        const currentPrice = priceMap.get(holding.stock.instrumentKey) ?? null;
+
+        investedCapital += quantity * purchasePrice;
+
+        if (currentPrice === null) {
+          allPricesAvailable = false;
+        } else {
+          currentValue += quantity * currentPrice;
+        }
+
+        return {
+          ...holding,
+          currentPrice,
+        };
+      });
+
+      const finalCurrentValue = allPricesAvailable ? currentValue : null;
+
+      const profitLoss =
+        finalCurrentValue !== null ? finalCurrentValue - investedCapital : null;
+
+      const profitLossPercentage =
+        profitLoss !== null && investedCapital > 0
+          ? (profitLoss / investedCapital) * 100
+          : null;
+
+      return {
+        ...portfolio,
+        holdings: updatedHoldings,
+        investedCapital,
+        currentValue: finalCurrentValue,
+        profitLoss,
+        profitLossPercentage,
+        remainingCapital: Number(portfolio.totalCapital) - investedCapital,
+      };
+    });
+    return NextResponse.json({
+      portfolios: updatedPortfolios,
+    });
+
+    
   } catch (error) {
     console.error("Fetch portfolios error:", error);
 
@@ -47,14 +118,12 @@ import path from "path";
 import fs from "fs";
 import { gunzipSync } from "zlib";
 
-
 const filePath = path.join(process.cwd(), "data", "upstox-instruments.json.gz");
 
 const compressedData = fs.readFileSync(filePath);
 const jsonData = zlib.gunzipSync(compressedData).toString("utf-8");
 
 const instruments = JSON.parse(jsonData);
-
 
 type UpstoxInstrument = {
   instrument_key: string;
@@ -79,10 +148,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 },
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // 2. Parse request body
@@ -91,17 +157,10 @@ export async function POST(request: NextRequest) {
     try {
       body = await request.json();
     } catch {
-      return NextResponse.json(
-        { error: "Invalid JSON body" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
-    if (
-      typeof body !== "object" ||
-      body === null ||
-      Array.isArray(body)
-    ) {
+    if (typeof body !== "object" || body === null || Array.isArray(body)) {
       return NextResponse.json(
         { error: "Invalid request body" },
         { status: 400 },
@@ -112,13 +171,12 @@ export async function POST(request: NextRequest) {
     const { name, type, totalCapital, holdings } = data;
 
     // 3. Validate portfolio details
-    if (
-      typeof name !== "string" ||
-      !name.trim() ||
-      name.trim().length > 100
-    ) {
+    if (typeof name !== "string" || !name.trim() || name.trim().length > 100) {
       return NextResponse.json(
-        { error: "Portfolio name is required and must be at most 100 characters" },
+        {
+          error:
+            "Portfolio name is required and must be at most 100 characters",
+        },
         { status: 400 },
       );
     }
@@ -172,9 +230,7 @@ export async function POST(request: NextRequest) {
       const item = holding as Record<string, unknown>;
 
       const instrumentKey =
-        typeof item.instrumentKey === "string"
-          ? item.instrumentKey.trim()
-          : "";
+        typeof item.instrumentKey === "string" ? item.instrumentKey.trim() : "";
 
       const quantity = item.quantity;
 
@@ -220,16 +276,12 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Read and decompress Upstox instrument master
-    
+
     const filePath = path.join(
       process.cwd(),
       "data",
       "upstox-instruments.json.gz",
     );
-
-    console.log("Current working directory:", process.cwd());
-console.log("Instrument file path:", filePath);
-console.log("File exists:", fs.existsSync(filePath));
 
     const compressedData = fs.readFileSync(filePath);
 
@@ -246,10 +298,7 @@ console.log("File exists:", fs.existsSync(filePath));
               instrument.segment === "BSE_EQ") &&
             instrument.instrument_type === "EQ",
         )
-        .map((instrument) => [
-          instrument.instrument_key,
-          instrument,
-        ]),
+        .map((instrument) => [instrument.instrument_key, instrument]),
     );
 
     const selectedInstruments: UpstoxInstrument[] = [];
@@ -280,9 +329,7 @@ console.log("File exists:", fs.existsSync(filePath));
       .map((holding) => holding.instrumentKey)
       .join(",");
 
-    const quoteUrl = new URL(
-      "https://api.upstox.com/v2/market-quote/quotes",
-    );
+    const quoteUrl = new URL("https://api.upstox.com/v2/market-quote/quotes");
 
     quoteUrl.searchParams.set("instrument_key", instrumentKeys);
 
@@ -362,9 +409,7 @@ console.log("File exists:", fs.existsSync(filePath));
         );
       }
 
-      const purchasePrice = new Prisma.Decimal(
-        quote.last_price.toString(),
-      );
+      const purchasePrice = new Prisma.Decimal(quote.last_price.toString());
 
       priceMap.set(holding.instrumentKey, purchasePrice);
 
@@ -411,9 +456,7 @@ console.log("File exists:", fs.existsSync(filePath));
       const stocks = await tx.stock.findMany({
         where: {
           instrumentKey: {
-            in: validatedHoldings.map(
-              (holding) => holding.instrumentKey,
-            ),
+            in: validatedHoldings.map((holding) => holding.instrumentKey),
           },
         },
         select: {
@@ -423,10 +466,7 @@ console.log("File exists:", fs.existsSync(filePath));
       });
 
       const stockMap = new Map(
-        stocks.map((stock) => [
-          stock.instrumentKey,
-          stock,
-        ]),
+        stocks.map((stock) => [stock.instrumentKey, stock]),
       );
 
       for (const holding of validatedHoldings) {
@@ -503,4 +543,3 @@ console.log("File exists:", fs.existsSync(filePath));
     );
   }
 }
-
